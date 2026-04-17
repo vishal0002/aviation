@@ -91,16 +91,9 @@
 <!-- ── PAGE HERO ── -->
 <section class="page-hero">
   <div class="container">
-    <div class="page-tag">FTO Tools · Tarmac-Ready</div>
+    <div class="page-tag">FTO Tools </div>
     <h1>Load <span class="text-cyan">&amp; Trim</span></h1>
-    <p class="hero-subtitle">
-      Cessna 172 Weight &amp; Balance · Offline PWA Edition
-    </p>
-    <div class="hero-badges">
-      <span class="badge badge-green" id="badge-online">● Online</span>
-      <span class="badge badge-amber">DGCA Compliant Format</span>
-      <span class="badge badge-cyan">C.G. Limit: 35.0 – 47.3 in aft of datum</span>
-    </div>
+    
     <!-- PWA Install Banner (hidden by default, shown via JS) -->
     <div id="pwa-install-bar" class="pwa-bar" style="display:none;">
       <span>✈ Install as app for tarmac offline use</span>
@@ -427,10 +420,13 @@
 // the globals exposed by script.js (currentAircraft, currentModelSpecs)
 
 function refreshDisplayLayer() {
-  if (!window.currentAircraft || !window.currentModelSpecs) return;
+  // 1. Removed "window." from the check
+  if (typeof currentAircraft === 'undefined' || !currentAircraft || !currentModelSpecs) return;
 
-  const ac  = window.currentAircraft;
-  const sp  = window.currentModelSpecs;
+  // 2. Removed "window." from the assignments
+  const ac  = currentAircraft;
+  const sp  = currentModelSpecs;
+  
   const st  = sp.stations;
   const lim = sp.limits;
   const con = sp.constants;
