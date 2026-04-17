@@ -605,10 +605,15 @@ footer {
 }
 
 @media (max-width: 680px) {
-  .container { padding: 0 1rem; }
-  .section { padding: 1.75rem 0; }
-  .page-hero { padding: 2rem 0 1.5rem; }
-  h1 { font-size: clamp(1.7rem, 7vw, 2.4rem); }
+  .container { padding: 0 0.75rem; }
+  .section { padding: 1.25rem 0; }
+  
+  /* 1. Slim down the Hero Section */
+  .page-hero { padding: 1.5rem 0 1rem; }
+  h1 { font-size: clamp(1.5rem, 6vw, 2rem); margin-bottom: 0.25rem; }
+  .hero-subtitle { margin-bottom: 0.75rem; font-size: 0.8rem; }
+  .hero-badges { margin-bottom: 0.5rem; gap: 0.35rem; }
+  .badge { font-size: 0.62rem; }
 
   .selector-row { flex-direction: column; align-items: flex-start; }
   select#select-tail { min-width: 0; width: 100%; }
@@ -616,21 +621,30 @@ footer {
   .aircraft-info-strip { width: 100%; }
   .info-chip { flex: 1; min-width: 70px; }
 
-  .trim-table { font-size: 0.78rem; min-width: 520px; }
-  .item-name  { font-size: 0.82rem; }
+  /* 2. Squash the Trim Table */
+  .trim-table { font-size: 0.7rem; min-width: 100%; }
+  .col-sr { display: none; } /* Hide the Sr No. column completely on phones */
+  
+  .trim-table thead th { padding: 0.4rem 0.2rem; font-size: 0.65rem; }
+  .trim-table tbody td { padding: 0.4rem 0.2rem; }
+  
+  .item-name  { font-size: 0.75rem; }
   .item-sub   { display: none; }
-  .col-wt     { width: 7.5rem; }
-  .col-arm    { width: 5rem; }
-  .col-moment { width: 6rem; }
-  input.calc-input { width: 60px; font-size: 0.8rem; }
-  .result-val { font-size: 1.1rem; }
+  
+  /* Drastically shrink column widths */
+  .col-wt     { width: 4.5rem; }
+  .col-arm    { width: 3.5rem; }
+  .col-moment { width: 4.5rem; }
+  
+  input.calc-input { width: 45px; font-size: 0.75rem; padding: 0.1rem; }
+  .input-unit { font-size: 0.6rem; }
+  .result-val { font-size: 1rem; }
 
-  .status-card { padding: 1.5rem 1rem; }
+  /* 3. Compact Status & Cards */
+  .status-card { padding: 1.25rem 1rem; }
   .status-value { font-size: clamp(1.3rem, 5vw, 1.8rem); }
 
-  .detail-card {
-    grid-template-columns: 1.5rem 1fr auto;
-  }
+  .detail-card { grid-template-columns: 1.5rem 1fr auto; }
   .detail-check { font-size: 0.62rem; }
 
   .ref-grid { grid-template-columns: repeat(3, 1fr); }
@@ -639,14 +653,11 @@ footer {
 
   .formula-strip { flex-direction: column; align-items: flex-start; gap: 0.25rem; }
   .formula-sep { display: none; }
-
-  .hero-badges { gap: 0.35rem; }
-  .badge { font-size: 0.62rem; }
 }
 
 @media (max-width: 400px) {
   .ref-grid { grid-template-columns: repeat(2, 1fr); }
-  .col-sr { width: 2rem; }
-  .trim-table thead th { padding: 0.5rem 0.4rem; }
-  .trim-table tbody td { padding: 0.5rem 0.4rem; }
+  .trim-table thead th { padding: 0.3rem 0.1rem; }
+  .trim-table tbody td { padding: 0.3rem 0.1rem; }
+  input.calc-input { width: 40px; }
 }
