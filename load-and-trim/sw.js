@@ -1,6 +1,6 @@
 // Caches all app assets for full offline operation on the tarmac.
 
-const CACHE_NAME = 'aviation-lt-v1';
+const CACHE_NAME = 'aviation-lt-v2';
 const ASSETS_TO_CACHE = [
   '/load-and-trim/',
   '/load-and-trim/index.html',
