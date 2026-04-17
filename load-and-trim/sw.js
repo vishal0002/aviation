@@ -1,6 +1,6 @@
 // Caches all app assets for full offline operation on the tarmac.
 
-const CACHE_NAME = 'aviation-lt-v2';
+const CACHE_NAME = 'aviation-lt-v3';
 const ASSETS_TO_CACHE = [
   '/load-and-trim/',
   '/load-and-trim/index.html',
@@ -45,7 +45,7 @@ self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
 
   // API calls: network-first, fall back to nothing (handled in app)
-  if (url.hostname.includes('workers.dev')) {
+  if (url.pathname.startsWith('/api/')) {
     event.respondWith(fetch(event.request));
     return;
   }
