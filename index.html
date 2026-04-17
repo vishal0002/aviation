@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Aviation — Vishal Bagade</title>
+
+  <meta name="author" content="Vishal Bagade">
+  <meta name="description" content="Aviation tools and utilities by Vishal Bagade — Carver Aviation FTO projects.">
+  <meta name="robots" content="index, follow">
+
+  <!-- GA4 -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-EVS54RD7KM"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-EVS54RD7KM');
+  </script>
+  <script>
+    function trackEvent(name, params = {}) { gtag('event', name, params); }
+  </script>
+
+  <!-- GoatCounter -->
+  <script data-goatcounter="https://evo-vhil.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+
+  <!-- Auto-redirect after 5 seconds -->
+  <meta http-equiv="refresh" content="5;url=/load-and-trim/">
+
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=IBM+Plex+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg:       #080c14;
+      --bg-card:  #0d1321;
+      --border:   rgba(0,212,255,0.15);
+      --border-hi:rgba(0,212,255,0.45);
+      --cyan:     #00d4ff;
+      --cyan-dim: rgba(0,212,255,0.08);
+      --amber:    #f59e0b;
+      --text:     #c8d6e5;
+      --text-dim: #607080;
+      --text-hi:  #eef4fb;
+      --mono:     'IBM Plex Mono', monospace;
+      --head:     'Rajdhani', sans-serif;
+      --glow:     0 0 18px rgba(0,212,255,0.35), 0 0 60px rgba(0,212,255,0.10);
+      --radius:   6px;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--head), sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+    }
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image:
+        linear-gradient(rgba(0,212,255,0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,212,255,0.025) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none; z-index: 0;
+    }
+    body::after {
+      content: '';
+      position: fixed; top: 0; left: 0; right: 0; height: 1px;
+      background: linear-gradient(90deg, transparent, var(--cyan), transparent);
+      opacity: 0.6; pointer-events: none; z-index: 100;
+    }
+
+    /* Scan line */
+    @keyframes scan { 0% { transform: translateY(-100%); } 100% { transform: translateY(100vh); } }
+    .scanline {
+      position: fixed; top: 0; left: 0; right: 0; height: 3px;
+      background: linear-gradient(180deg, transparent, rgba(0,212,255,0.04), transparent);
+      animation: scan 8s linear infinite;
+      pointer-events: none; z-index: 99;
+    }
+
+    /* Nav */
+    nav {
+      position: sticky; top: 0; z-index: 200;
+      background: rgba(8,12,20,0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-inner {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0.85rem 2rem; max-width: 1160px; margin: 0 auto;
+    }
+    .nav-logo {
+      font-family: var(--head); font-size: 1.1rem; font-weight: 700;
+      color: var(--cyan); letter-spacing: 0.1em;
+      display: flex; align-items: center; gap: 0.5rem;
+      text-decoration: none;
+    }
+    .nav-logo .dot { width: 7px; height: 7px; background: var(--cyan); border-radius: 50%; box-shadow: var(--glow); }
+    .nav-links { display: flex; gap: 2rem; }
+    .nav-links a {
+      font-family: var(--mono); font-size: 0.78rem; letter-spacing: 0.08em;
+      color: var(--text-dim); text-transform: uppercase; text-decoration: none;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover, .nav-links a.active { color: var(--cyan); }
+
+    /* Main content */
+    main {
+      flex: 1; display: flex; align-items: center; justify-content: center;
+      padding: 4rem 2rem; position: relative; z-index: 1;
+    }
+    .splash {
+      max-width: 600px; text-align: center;
+    }
+    .splash-icon {
+      font-size: 4rem; margin-bottom: 1.5rem; display: block;
+      animation: float 3s ease-in-out infinite;
+    }
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+    .splash-eyebrow {
+      font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.2em;
+      text-transform: uppercase; color: var(--amber);
+      display: flex; align-items: center; justify-content: center;
+      gap: 0.75rem; margin-bottom: 1.5rem;
+    }
+    .splash-eyebrow::before, .splash-eyebrow::after {
+      content: ''; width: 40px; height: 1px; background: var(--amber); opacity: 0.7;
+    }
+    h1 {
+      font-family: var(--head); font-size: clamp(2rem, 6vw, 3.2rem); font-weight: 700;
+      color: var(--text-hi); letter-spacing: 0.04em; line-height: 1.15;
+      margin-bottom: 1rem;
+    }
+    h1 span { color: var(--cyan); }
+    .splash-sub {
+      font-family: var(--mono); font-size: 0.9rem; color: var(--text-dim);
+      margin-bottom: 2.5rem; line-height: 1.8;
+    }
+    .disclaimer {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--amber);
+      border-radius: var(--radius);
+      padding: 1.25rem 1.5rem;
+      font-family: var(--mono); font-size: 0.8rem; color: var(--text);
+      line-height: 1.8; text-align: left; margin-bottom: 2.5rem;
+    }
+    .disclaimer strong { color: var(--amber); }
+    .disclaimer a { color: var(--cyan); text-decoration: none; }
+    .disclaimer a:hover { color: var(--text-hi); }
+
+    /* Countdown */
+    .redirect-bar {
+      background: var(--bg-card);
+      border: 1px solid var(--border-hi);
+      border-radius: var(--radius);
+      padding: 1rem 1.5rem;
+      font-family: var(--mono); font-size: 0.85rem; color: var(--text-dim);
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 1rem; flex-wrap: wrap;
+    }
+    .redirect-bar span { color: var(--cyan); font-weight: 500; }
+    .btn-go {
+      display: inline-flex; align-items: center;
+      font-family: var(--head); font-weight: 600; letter-spacing: 0.07em;
+      font-size: 0.9rem; padding: 0.6rem 1.4rem; border-radius: var(--radius);
+      background: var(--cyan); color: #050810; text-decoration: none;
+      box-shadow: var(--glow); transition: all 0.22s; text-transform: uppercase;
+      white-space: nowrap;
+    }
+    .btn-go:hover { background: #20e5ff; transform: translateY(-1px); }
+
+    /* Progress bar */
+    .progress-track {
+      height: 2px; background: var(--border); border-radius: 2px;
+      margin-top: 1rem; overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%; background: var(--cyan);
+      box-shadow: 0 0 8px var(--cyan);
+      animation: progress 5s linear forwards;
+    }
+    @keyframes progress { from { width: 0%; } to { width: 100%; } }
+
+    /* Footer */
+    footer {
+      border-top: 1px solid var(--border); padding: 2rem 0;
+      position: relative; z-index: 1;
+    }
+    .footer-inner {
+      display: flex; justify-content: space-between; align-items: center;
+      flex-wrap: wrap; gap: 1rem;
+      max-width: 1160px; margin: 0 auto; padding: 0 2rem;
+    }
+    .footer-brand { font-family: var(--head); font-size: 0.9rem; font-weight: 700; color: var(--cyan); letter-spacing: 0.1em; }
+    .footer-meta { font-family: var(--mono); font-size: 0.72rem; color: var(--text-dim); margin-top: 0.25rem; }
+    .footer-nav { display: flex; gap: 1.5rem; flex-wrap: wrap; }
+    .footer-nav a {
+      font-family: var(--mono); font-size: 0.72rem; color: var(--text-dim);
+      text-transform: uppercase; letter-spacing: 0.08em; text-decoration: none; transition: color 0.2s;
+    }
+    .footer-nav a:hover { color: var(--cyan); }
+
+    /* Hamburger */
+    .nav-hamburger {
+      display: none; flex-direction: column; justify-content: center; align-items: center;
+      gap: 5px; width: 36px; height: 36px; background: transparent;
+      border: 1px solid var(--border); border-radius: var(--radius); cursor: pointer; padding: 0;
+    }
+    .nav-hamburger span { display: block; width: 18px; height: 1.5px; background: var(--text-dim); border-radius: 2px; transition: all 0.25s ease; transform-origin: center; }
+    .nav-hamburger.open span:nth-child(1) { transform: translateY(6.5px) rotate(45deg); background: var(--cyan); }
+    .nav-hamburger.open span:nth-child(2) { opacity: 0; transform: scaleX(0); }
+    .nav-hamburger.open span:nth-child(3) { transform: translateY(-6.5px) rotate(-45deg); background: var(--cyan); }
+
+    @media (max-width: 640px) {
+      .nav-hamburger { display: flex; }
+      .nav-links {
+        display: none; position: fixed; top: 49px; left: 0; right: 0;
+        background: rgba(8,12,20,0.97); backdrop-filter: blur(16px);
+        border-bottom: 1px solid var(--border);
+        flex-direction: column; gap: 0; padding: 0.5rem 0 1rem; z-index: 199;
+      }
+      .nav-links.open { display: flex; }
+      .nav-links a { padding: 0.75rem 2rem; font-size: 0.82rem; border-bottom: 1px solid rgba(0,212,255,0.05); }
+      .nav-links a:last-child { border-bottom: none; }
+      .footer-inner { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+<div class="scanline"></div>
+
+<nav>
+  <div class="nav-inner">
+    <a href="/" class="nav-logo">
+      <span class="dot"></span> Carver Aviation
+    </a>
+    <button class="nav-hamburger" id="navToggle" aria-label="Toggle navigation" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+    <div class="nav-links" id="navLinks">
+      <a href="/" class="active">Home</a>
+      <a href="/load-and-trim/">Load &amp; Trim</a>
+      <a href="/about.html">About</a>
+    </div>
+  </div>
+</nav>
+
+<main>
+  <div class="splash">
+    <span class="splash-icon">✈</span>
+    <div class="splash-eyebrow">aviation.evovhil.com</div>
+    <h1>Carver Aviation<br><span>FTO Digital Tools</span></h1>
+    <p class="splash-sub">
+      Aviation utility applications for flight training operations.<br>
+      Built for the tarmac — works offline, loads instantly.
+    </p>
+
+    <div class="disclaimer">
+      <strong>⚠ SHARE &amp; SUPPORT</strong><br>
+      These tools are provided free of charge for educational and operational use. 
+      If you find them useful, please share with fellow students.<br><br>
+      For feedback, corrections, or feature requests, please 
+      <a href="/about.html">visit the About page</a>.
+      These tools are unofficial aids — always cross-check with certified documentation.
+    </div>
+
+    <div class="redirect-bar">
+      <div>
+        Redirecting to Load &amp; Trim Sheet in <span id="countdown">5</span>s…
+        <div class="progress-track"><div class="progress-fill"></div></div>
+      </div>
+      <a href="/load-and-trim/" class="btn-go" onclick="trackEvent('redirect_cta_click')">Go Now →</a>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <div class="footer-inner">
+    <div>
+      <div class="footer-brand">✈ Aviation</div>
+      <div class="footer-meta">aviation.evovhil.com · FTO Digital Tools</div>
+    </div>
+    <nav class="footer-nav">
+      <a href="/load-and-trim/">Load &amp; Trim</a>
+      <a href="/about.html">About</a>
+      <a href="https://evovhil.com/">EVO vHIL</a>
+    </nav>
+  </div>
+</footer>
+
+<script>
+// Countdown timer
+let t = 5;
+const el = document.getElementById('countdown');
+const interval = setInterval(() => {
+  t--;
+  if (el) el.textContent = t;
+  if (t <= 0) {
+    clearInterval(interval);
+    window.location.href = '/load-and-trim/';
+  }
+}, 1000);
+
+// GoatCounter time tracking
+let startTime = Date.now();
+window.addEventListener("beforeunload", function () {
+  let timeSpent = Math.round((Date.now() - startTime) / 1000);
+  if (timeSpent > 5) {
+    navigator.sendBeacon("https://evo-vhil.goatcounter.com/count",
+      JSON.stringify({ path: location.pathname + "#time-" + timeSpent, event: true }));
+  }
+});
+
+// Hamburger
+const navToggle = document.getElementById('navToggle');
+const navLinks  = document.getElementById('navLinks');
+if (navToggle && navLinks) {
+  navToggle.addEventListener('click', () => {
+    const isOpen = navLinks.classList.toggle('open');
+    navToggle.classList.toggle('open', isOpen);
+    navToggle.setAttribute('aria-expanded', isOpen);
+  });
+  navLinks.querySelectorAll('a').forEach(a => {
+    a.addEventListener('click', () => {
+      navLinks.classList.remove('open');
+      navToggle.classList.remove('open');
+      navToggle.setAttribute('aria-expanded', 'false');
+    });
+  });
+  document.addEventListener('click', e => {
+    if (!navToggle.contains(e.target) && !navLinks.contains(e.target)) {
+      navLinks.classList.remove('open');
+      navToggle.classList.remove('open');
+      navToggle.setAttribute('aria-expanded', 'false');
+    }
+  });
+}
+</script>
+</body>
+</html>
