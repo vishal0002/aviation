@@ -13,7 +13,7 @@ async function initializeApp() {
     // 2. Fetch the JSON from Cloudflare Worker or LocalStorage
     try {
         // Replace with your actual Cloudflare Worker URL or trigger
-        const response = await fetch('https://tight-salad-c367.vishalbagade.workers.dev'); 
+        const response = await fetch('/api/data'); 
         if (!response.ok) throw new Error("Network offline or fetch failed");
         
         const data = await response.json();
