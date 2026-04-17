@@ -3,6 +3,9 @@ let fleetDatabase = null;
 let currentAircraft = null;
 let currentModelSpecs = null;
 
+// --- PWA INSTALL STATE ---
+let deferredPrompt;
+
 // --- PHASE 1: THE DATA PIPELINE ---
 async function initializeApp() {
     // 1. Register the Service Worker for offline capability
@@ -10,9 +13,8 @@ async function initializeApp() {
         navigator.serviceWorker.register('/load-and-trim/sw.js', { scope: '/load-and-trim/' });
     }
 
-    // 2. Fetch the JSON from Cloudflare Worker or LocalStorage
+    // 2. Fetch the JSON from Cloudflare Custom Domain or LocalStorage
     try {
-        // Replace with your actual Cloudflare Worker URL or trigger
         const response = await fetch('https://api.evovhil.com'); 
         if (!response.ok) throw new Error("Network offline or fetch failed");
         
@@ -125,5 +127,39 @@ function populateTailDropdown() {
     inputs.forEach(input => input.addEventListener('input', runCalculations));
 }
 
+// --- PHASE 3: PWA INSTALLATION LOGIC ---
+function setupPWA() {
+    const installBar = document.getElementById('pwa-install-bar');
+    const installBtn = document.getElementById('pwa-install-btn');
+
+    if (!installBar || !installBtn) return;
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+        // Prevent Android's default mini-infobar
+        e.preventDefault();
+        // Stash the event so it can be triggered later
+        deferredPrompt = e;
+        // Un-hide your custom HTML banner
+        installBar.style.display = 'flex'; 
+    });
+
+    installBtn.addEventListener('click', async () => {
+        if (deferredPrompt) {
+            // Show the official browser install prompt
+            deferredPrompt.prompt();
+            // Wait for the user to respond
+            const { outcome } = await deferredPrompt.userChoice;
+            // Hide the banner if they accepted
+            if (outcome === 'accepted') {
+                installBar.style.display = 'none';
+            }
+            deferredPrompt = null;
+        }
+    });
+}
+
 // Boot up
-window.onload = initializeApp;
+window.onload = () => {
+    initializeApp();
+    setupPWA();
+};
