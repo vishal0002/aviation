@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Load &amp; Trim </title>
+
+  <meta name="author" content="Vishal Bagade">
+  <meta name="description" content="Offline-capable Load and Trim sheet calculator.">
+  <meta name="robots" content="index, follow">
+  <meta name="theme-color" content="#00d4ff">
+
+  <!-- GA4 -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-EVS54RD7KM"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-EVS54RD7KM');
+  </script>
+  <script>
+    function trackEvent(name, params = {}) { gtag('event', name, params); }
+  </script>
+
+  <!-- GoatCounter -->
+  <script data-goatcounter="https://evo-vhil.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+
+  <!-- Time-on-page tracking -->
+  <script>
+    let startTime = Date.now();
+    window.addEventListener("beforeunload", function () {
+      let timeSpent = Math.round((Date.now() - startTime) / 1000);
+      if (timeSpent > 5) {
+        navigator.sendBeacon("https://evo-vhil.goatcounter.com/count",
+          JSON.stringify({ path: location.pathname + "#time-" + timeSpent, event: true }));
+      }
+    });
+  </script>
+
+  <!-- PWA Manifest -->
+  <link rel="manifest" href="/load-and-trim/manifest.json">
+
+  <!-- Icons -->
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=IBM+Plex+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+
+  <link rel="preload" href="style.css" as="style">
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<script>
+  let scrollTracked = false;
+  window.addEventListener("scroll", () => {
+    const scrollPosition = window.scrollY + window.innerHeight;
+    const pageHeight = document.documentElement.scrollHeight;
+    if (!scrollTracked && scrollPosition > pageHeight * 0.5) {
+      scrollTracked = true;
+      trackEvent("scroll_50");
+      navigator.sendBeacon("https://evo-vhil.goatcounter.com/count",
+        JSON.stringify({ path: location.pathname + "#scroll-50", event: true }));
+    }
+  });
+</script>
+
+<body>
+<div class="scanline"></div>
+
+<!-- ── NAV ── -->
+<nav>
+  <div class="nav-inner">
+    <a href="/load-and-trim/" class="nav-logo">
+      <span class="dot"></span>Aviation
+    </a>
+    <button class="nav-hamburger" id="navToggle" aria-label="Toggle navigation" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+    <div class="nav-links" id="navLinks">
+      <a href="/">Home</a>
+      <a href="/load-and-trim/" class="active">Load &amp; Trim</a>
+      <a href="/about.html">About</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ── PAGE HERO ── -->
+<section class="page-hero">
+  <div class="container">
+    <div class="page-tag">FTO Tools · Tarmac-Ready</div>
+    <h1>Load <span class="text-cyan">&amp; Trim</span></h1>
+    <p class="hero-subtitle">
+      Cessna 172 Weight &amp; Balance · Offline PWA Edition
+    </p>
+    <div class="hero-badges">
+      <span class="badge badge-green" id="badge-online">● Online</span>
+      <span class="badge badge-amber">DGCA Compliant Format</span>
+      <span class="badge badge-cyan">C.G. Limit: 35.0 – 47.3 in aft of datum</span>
+    </div>
+    <!-- PWA Install Banner (hidden by default, shown via JS) -->
+    <div id="pwa-install-bar" class="pwa-bar" style="display:none;">
+      <span>✈ Install as app for tarmac offline use</span>
+      <button id="pwa-install-btn" class="btn-pwa">Add to Home Screen</button>
+    </div>
+  </div>
+</section>
+
+<!-- ── AIRCRAFT SELECTOR ── -->
+<section class="section section-select">
+  <div class="container">
+    <div class="selector-card">
+      <div class="selector-label">
+        <span class="mono-tag">STEP 01</span>
+        <span>Select Aircraft Registration</span>
+      </div>
+      <div class="selector-row">
+        <div class="select-wrap">
+          <span class="select-prefix">VT –</span>
+          <select id="select-tail">
+            <option value="">Loading fleet data…</option>
+          </select>
+        </div>
+        <div class="aircraft-info-strip" id="aircraft-info-strip">
+          <div class="info-chip" id="info-model"><span class="chip-label">Model</span><span class="chip-val">—</span></div>
+          <div class="info-chip" id="info-bew"><span class="chip-label">BEW</span><span class="chip-val">— kg</span></div>
+          <div class="info-chip" id="info-mtow"><span class="chip-label">MTOW</span><span class="chip-val">— kg</span></div>
+          <div class="info-chip" id="info-cg-range"><span class="chip-label">C.G. Range</span><span class="chip-val">— in</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── TRIM SHEET ── -->
+<section class="section section-sheet">
+  <div class="container">
+    <div class="sheet-label-row">
+      <span class="mono-tag">STEP 02</span>
+      <span>Payload &amp; Fuel — Load Sheet</span>
+    </div>
+
+    <!-- TRIM TABLE (mimics physical sheet) -->
+    <div class="sheet-scroll">
+      <table class="trim-table" role="table" aria-label="Load and Trim Worksheet">
+        <thead>
+          <tr>
+            <th class="col-sr">Sr.</th>
+            <th class="col-item">Item Description</th>
+            <th class="col-wt">Weight<br><small>kg</small></th>
+            <th class="col-arm">Arm<br><small>inches</small></th>
+            <th class="col-moment">Moment<br><small>kg·in</small></th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Row 1: Basic Empty Weight -->
+          <tr class="row-fixed">
+            <td class="col-sr">1</td>
+            <td class="col-item">
+              <span class="item-name">Basic Empty Weight</span>
+              <span class="item-sub">(from selected aircraft)</span>
+            </td>
+            <td class="col-wt"><span id="disp-bew-wt" class="fixed-val">—</span></td>
+            <td class="col-arm"><span id="disp-bew-arm" class="fixed-val">—</span></td>
+            <td class="col-moment"><span id="disp-bew-moment" class="fixed-val">—</span></td>
+          </tr>
+
+          <!-- Row 2: Usable Fuel -->
+          <tr class="row-input">
+            <td class="col-sr">2</td>
+            <td class="col-item">
+              <span class="item-name">Usable Fuel</span>
+              <span class="item-sub">Enter litres → auto kg @0.72 SG</span>
+            </td>
+            <td class="col-wt">
+              <div class="input-cell">
+                <input type="number" id="in-fuel" class="calc-input" placeholder="e.g. 144" min="0" inputmode="decimal" aria-label="Fuel in litres">
+                <span class="input-unit">L</span>
+              </div>
+              <span id="disp-fuel-kg" class="computed-sub">— kg</span>
+            </td>
+            <td class="col-arm"><span id="disp-fuel-arm" class="fixed-val">—</span></td>
+            <td class="col-moment"><span id="disp-fuel-moment" class="computed-val">—</span></td>
+          </tr>
+
+          <!-- Row 3: Pilot + Co-Pilot -->
+          <tr class="row-input">
+            <td class="col-sr">3</td>
+            <td class="col-item">
+              <span class="item-name">Pilot &amp; Co-Pilot</span>
+              <span class="item-sub">Front seat combined</span>
+            </td>
+            <td class="col-wt">
+              <div class="input-cell">
+                <input type="number" id="in-pilot" class="calc-input" placeholder="e.g. 150" min="0" inputmode="decimal" aria-label="Pilot and co-pilot weight in kg">
+                <span class="input-unit">kg</span>
+              </div>
+            </td>
+            <td class="col-arm"><span id="disp-pilot-arm" class="fixed-val">—</span></td>
+            <td class="col-moment"><span id="disp-pilot-moment" class="computed-val">—</span></td>
+          </tr>
+
+          <!-- Row 4: Rear Passengers -->
+          <tr class="row-input">
+            <td class="col-sr">4</td>
+            <td class="col-item">
+              <span class="item-name">Rear Passengers</span>
+              <span class="item-sub">Rear seat combined</span>
+            </td>
+            <td class="col-wt">
+              <div class="input-cell">
+                <input type="number" id="in-rear-pax" class="calc-input" placeholder="0" min="0" inputmode="decimal" aria-label="Rear passenger weight in kg">
+                <span class="input-unit">kg</span>
+              </div>
+            </td>
+            <td class="col-arm"><span id="disp-pax-arm" class="fixed-val">—</span></td>
+            <td class="col-moment"><span id="disp-pax-moment" class="computed-val">—</span></td>
+          </tr>
+
+          <!-- Row 5: Baggage Area 1 -->
+          <tr class="row-input">
+            <td class="col-sr">5</td>
+            <td class="col-item">
+              <span class="item-name">Baggage Area 1</span>
+              <span class="item-sub">Aft of rear seat</span>
+            </td>
+            <td class="col-wt">
+              <div class="input-cell">
+                <input type="number" id="in-bag1" class="calc-input" placeholder="0" min="0" inputmode="decimal" aria-label="Baggage area 1 weight in kg">
+                <span class="input-unit">kg</span>
+              </div>
+            </td>
+            <td class="col-arm"><span id="disp-bag1-arm" class="fixed-val">—</span></td>
+            <td class="col-moment"><span id="disp-bag1-moment" class="computed-val">—</span></td>
+          </tr>
+
+          <!-- Row 6: Baggage Area 2 -->
+          <tr class="row-input">
+            <td class="col-sr">6</td>
+            <td class="col-item">
+              <span class="item-name">Baggage Area 2</span>
+              <span class="item-sub">Tailcone / extended baggage</span>
+            </td>
+            <td class="col-wt">
+              <div class="input-cell">
+                <input type="number" id="in-bag2" class="calc-input" placeholder="0" min="0" inputmode="decimal" aria-label="Baggage area 2 weight in kg">
+                <span class="input-unit">kg</span>
+              </div>
+            </td>
+            <td class="col-arm"><span id="disp-bag2-arm" class="fixed-val">—</span></td>
+            <td class="col-moment"><span id="disp-bag2-moment" class="computed-val">—</span></td>
+          </tr>
+
+          <!-- Row 7: Ramp Weight (computed) -->
+          <tr class="row-subtotal">
+            <td class="col-sr">7</td>
+            <td class="col-item">
+              <span class="item-name">Ramp Weight</span>
+              <span class="item-sub">Rows 1–6 sum</span>
+            </td>
+            <td class="col-wt"><span id="disp-ramp-wt" class="subtotal-val">—</span></td>
+            <td class="col-arm">—</td>
+            <td class="col-moment"><span id="disp-ramp-moment" class="subtotal-val">—</span></td>
+          </tr>
+
+          <!-- Row 8: Taxi Fuel -->
+          <tr class="row-fixed row-deduct">
+            <td class="col-sr">8</td>
+            <td class="col-item">
+              <span class="item-name">Engine Start &amp; Taxi Fuel</span>
+              <span class="item-sub">Deducted from ramp weight</span>
+            </td>
+            <td class="col-wt"><span id="disp-taxi-wt" class="fixed-val">—</span></td>
+            <td class="col-arm"><span id="disp-taxi-arm" class="fixed-val">—</span></td>
+            <td class="col-moment"><span id="disp-taxi-moment" class="fixed-val">—</span></td>
+          </tr>
+
+          <!-- Row 9: Total Takeoff -->
+          <tr class="row-result">
+            <td class="col-sr">9</td>
+            <td class="col-item">
+              <span class="item-name">Total Take Off Weight</span>
+              <span class="item-sub">(Row 7 − Row 8)</span>
+            </td>
+            <td class="col-wt">
+              <span id="out-tow" class="result-val">0.00</span>
+              <span class="result-unit">kg</span>
+            </td>
+            <td class="col-arm">
+              <span class="cg-label">C.G. =</span>
+            </td>
+            <td class="col-moment">
+              <span id="out-cg" class="result-val cg-val">0.00</span>
+              <span class="result-unit">in</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div><!-- /sheet-scroll -->
+
+    <!-- Baggage warning -->
+    <div class="baggage-note" id="baggage-note">
+      <span class="note-icon">ℹ</span>
+      <span>Max allowable baggage (Areas 1 + 2 combined): <strong id="disp-max-bag">54.54 kg</strong></span>
+    </div>
+
+  </div><!-- /container -->
+</section>
+
+<!-- ── STATUS & RESULTS ── -->
+<section class="section section-results">
+  <div class="container">
+    <div class="sheet-label-row">
+      <span class="mono-tag">RESULT</span>
+      <span>Flight Envelope Status</span>
+    </div>
+
+    <div class="results-grid">
+
+      <!-- Status Banner -->
+      <div class="status-card" id="status-card">
+        <div class="status-label">GO / NO-GO</div>
+        <div class="status-value" id="out-status">WAITING</div>
+        <div class="status-sub" id="status-sub">Select an aircraft and enter payload to begin</div>
+      </div>
+
+      <!-- Detail Cards -->
+      <div class="detail-cards">
+        <div class="detail-card">
+          <div class="detail-icon">⚖</div>
+          <div class="detail-label">Total Takeoff Weight</div>
+          <div class="detail-value"><span id="detail-tow">—</span> <span class="detail-unit">kg</span></div>
+          <div class="detail-check" id="check-weight">—</div>
+        </div>
+        <div class="detail-card">
+          <div class="detail-icon">📍</div>
+          <div class="detail-label">Center of Gravity</div>
+          <div class="detail-value"><span id="detail-cg">—</span> <span class="detail-unit">in aft of datum</span></div>
+          <div class="detail-check" id="check-cg">—</div>
+        </div>
+        <div class="detail-card">
+          <div class="detail-icon">🧳</div>
+          <div class="detail-label">Baggage Load</div>
+          <div class="detail-value"><span id="detail-bag">—</span> <span class="detail-unit">kg</span></div>
+          <div class="detail-check" id="check-bag">—</div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- CG Formula reference -->
+    <div class="formula-strip">
+      <span class="formula-label">C.G. in inches</span>
+      <span class="formula-eq">= Moment ÷ Weight</span>
+      <span class="formula-sep">·</span>
+      <span class="formula-label">Limit Range</span>
+      <span class="formula-eq">35.0 → 47.3 inches aft of datum</span>
+    </div>
+  </div>
+</section>
+
+<!-- ── CONVERSIONS REFERENCE ── -->
+<section class="section section-ref">
+  <div class="container">
+    <div class="sheet-label-row">
+      <span class="mono-tag">REF</span>
+      <span>Quick Conversions &amp; Constants</span>
+    </div>
+    <div class="ref-grid">
+      <div class="ref-card">
+        <span class="ref-label">1 IMP GAL</span>
+        <span class="ref-eq">= 4.54 L</span>
+      </div>
+      <div class="ref-card">
+        <span class="ref-label">1 US GAL</span>
+        <span class="ref-eq">= 3.79 L</span>
+      </div>
+      <div class="ref-card">
+        <span class="ref-label">AVGAS SG</span>
+        <span class="ref-eq">= 0.72 (100LL)</span>
+      </div>
+      <div class="ref-card">
+        <span class="ref-label">kg → lb</span>
+        <span class="ref-eq">× 2.205</span>
+      </div>
+      <div class="ref-card">
+        <span class="ref-label">1 inch</span>
+        <span class="ref-eq">= 2.54 cm</span>
+      </div>
+      <div class="ref-card highlight-ref">
+        <span class="ref-label">KG (Fuel)</span>
+        <span class="ref-eq">= Litres × SG</span>
+      </div>
+    </div>
+    <div class="disclaimer-strip">
+      <strong>⚠ APPROVED VIDE:</strong> DGCA Letter No. Q3/CAMO/ACA/1506620 Dated 08.10.2015 ·
+      This tool is an unofficial digital aid. Always verify with the certified Load &amp; Trim Sheet.
+    </div>
+  </div>
+</section>
+
+<!-- ── FOOTER ── -->
+<footer>
+  <div class="footer-inner">
+    <div>
+      <div class="footer-brand">✈ Aviation · Load &amp; Trim</div>
+      <div class="footer-meta">aviation.evovhil.com · Offline PWA · Built by Vishal Bagade</div>
+    </div>
+    <nav class="footer-nav">
+      <a href="/">Home</a>
+      <a href="/load-and-trim/">Load &amp; Trim</a>
+      <a href="/about.html">About</a>
+      <a href="https://evovhil.com/">EVO vHIL</a>
+    </nav>
+  </div>
+</footer>
+
+<!-- ── SCRIPTS ── -->
+<script src="script.js"></script>
+
+<script>
+// ── Display Enhancement Layer ──────────────────────────────────
+// Augments the DOM with moment/weight display values using
+// the globals exposed by script.js (currentAircraft, currentModelSpecs)
+
+function refreshDisplayLayer() {
+  if (!window.currentAircraft || !window.currentModelSpecs) return;
+
+  const ac  = window.currentAircraft;
+  const sp  = window.currentModelSpecs;
+  const st  = sp.stations;
+  const lim = sp.limits;
+  const con = sp.constants;
+
+  // Input values
+  const fuelL  = parseFloat(document.getElementById('in-fuel').value)    || 0;
+  const pilot  = parseFloat(document.getElementById('in-pilot').value)   || 0;
+  const pax    = parseFloat(document.getElementById('in-rear-pax').value)|| 0;
+  const bag1   = parseFloat(document.getElementById('in-bag1').value)    || 0;
+  const bag2   = parseFloat(document.getElementById('in-bag2').value)    || 0;
+
+  const fuelKg = fuelL * con.avgas_sg;
+  const bewMom = ac.bew_kg * ac.bew_arm;
+
+  // --- Row 1: BEW ---
+  setText('disp-bew-wt',     ac.bew_kg.toFixed(2));
+  setText('disp-bew-arm',    ac.bew_arm.toFixed(2));
+  setText('disp-bew-moment', bewMom.toFixed(0));
+
+  // --- Row 2: Fuel ---
+  setText('disp-fuel-arm',    st.usable_fuel_arm.toFixed(2));
+  setText('disp-fuel-kg',     fuelKg.toFixed(1) + ' kg');
+  setText('disp-fuel-moment', fuelL > 0 ? (fuelKg * st.usable_fuel_arm).toFixed(0) : '—');
+
+  // --- Row 3: Pilot ---
+  setText('disp-pilot-arm',    st.pilot_copilot_arm.toFixed(2));
+  setText('disp-pilot-moment', pilot > 0 ? (pilot * st.pilot_copilot_arm).toFixed(0) : '—');
+
+  // --- Row 4: Rear Pax ---
+  setText('disp-pax-arm',    st.rear_pax_arm.toFixed(2));
+  setText('disp-pax-moment', pax > 0 ? (pax * st.rear_pax_arm).toFixed(0) : '—');
+
+  // --- Row 5: Bag 1 ---
+  setText('disp-bag1-arm',    st.baggage_1_arm.toFixed(2));
+  setText('disp-bag1-moment', bag1 > 0 ? (bag1 * st.baggage_1_arm).toFixed(0) : '—');
+
+  // --- Row 6: Bag 2 ---
+  setText('disp-bag2-arm',    st.baggage_2_arm.toFixed(2));
+  setText('disp-bag2-moment', bag2 > 0 ? (bag2 * st.baggage_2_arm).toFixed(0) : '—');
+
+  // --- Row 7: Ramp Weight ---
+  const totalMom = bewMom
+    + (fuelKg * st.usable_fuel_arm)
+    + (pilot  * st.pilot_copilot_arm)
+    + (pax    * st.rear_pax_arm)
+    + (bag1   * st.baggage_1_arm)
+    + (bag2   * st.baggage_2_arm);
+  const rampWt = ac.bew_kg + pilot + pax + bag1 + bag2 + fuelKg;
+  setText('disp-ramp-wt',     rampWt.toFixed(2));
+  setText('disp-ramp-moment', totalMom.toFixed(0));
+
+  // --- Row 8: Taxi ---
+  const taxiWt  = con.taxi_fuel_kg;
+  const taxiArm = con.taxi_fuel_arm;
+  setText('disp-taxi-wt',     taxiWt.toFixed(2));
+  setText('disp-taxi-arm',    taxiArm.toFixed(2));
+  setText('disp-taxi-moment', (taxiWt * taxiArm).toFixed(0));
+
+  // --- Aircraft Info Strip ---
+  setHTML('info-model',    `<span class="chip-label">Model</span><span class="chip-val">${ac.model}</span>`);
+  setHTML('info-bew',      `<span class="chip-label">BEW</span><span class="chip-val">${ac.bew_kg} kg</span>`);
+  setHTML('info-mtow',     `<span class="chip-label">MTOW</span><span class="chip-val">${ac.mtow_kg} kg</span>`);
+  setHTML('info-cg-range', `<span class="chip-label">C.G.</span><span class="chip-val">${lim.cg_forward}–${lim.cg_aft} in</span>`);
+
+  // --- Max Baggage ---
+  setText('disp-max-bag', lim.max_baggage_kg + ' kg');
+
+  // --- Detail Cards & Status ---
+  const towEl = document.getElementById('out-tow');
+  const cgEl  = document.getElementById('out-cg');
+  if (!towEl || !cgEl) return;
+
+  const tow = parseFloat(towEl.innerText) || 0;
+  const cg  = parseFloat(cgEl.innerText)  || 0;
+
+  setText('detail-tow', tow.toFixed(2));
+  setText('detail-cg',  cg.toFixed(2));
+  setText('detail-bag', (bag1 + bag2).toFixed(1));
+
+  const isWeightSafe  = tow > 0 && tow <= ac.mtow_kg;
+  const isBaggageSafe = (bag1 + bag2) <= lim.max_baggage_kg;
+  const isCGSafe      = cg >= lim.cg_forward && cg <= lim.cg_aft;
+  const isReady       = tow > 0;
+
+  // Check badges
+  setCheck('check-weight', isReady, isWeightSafe, `≤ ${ac.mtow_kg} kg MTOW`);
+  setCheck('check-cg',     isReady, isCGSafe,     `${lim.cg_forward}–${lim.cg_aft} in`);
+  setCheck('check-bag',    isReady, isBaggageSafe, `≤ ${lim.max_baggage_kg} kg`);
+
+  // Status card
+  const card = document.getElementById('status-card');
+  const statusEl = document.getElementById('out-status');
+  const subEl    = document.getElementById('status-sub');
+
+  if (!isReady) {
+    card.className = 'status-card status-waiting';
+    if (subEl) subEl.textContent = 'Select an aircraft and enter payload to begin';
+    return;
+  }
+
+  const isSafe = isWeightSafe && isBaggageSafe && isCGSafe;
+  if (isSafe) {
+    card.className = 'status-card status-go';
+    if (statusEl) statusEl.textContent = 'WITHIN LIMITS ✅';
+    if (subEl) subEl.textContent = `TOW: ${tow.toFixed(1)} kg  ·  C.G.: ${cg.toFixed(2)} in  ·  All checks passed`;
+  } else {
+    card.className = 'status-card status-nogo';
+    if (statusEl) statusEl.textContent = 'NO GO ❌';
+    let reasons = [];
+    if (!isWeightSafe)  reasons.push(`Weight ${tow.toFixed(1)} kg exceeds MTOW ${ac.mtow_kg} kg`);
+    if (!isCGSafe)      reasons.push(`C.G. ${cg.toFixed(2)} in out of range ${lim.cg_forward}–${lim.cg_aft}`);
+    if (!isBaggageSafe) reasons.push(`Baggage ${(bag1+bag2).toFixed(1)} kg exceeds ${lim.max_baggage_kg} kg limit`);
+    if (subEl) subEl.textContent = reasons.join(' · ');
+  }
+}
+
+function setText(id, val) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = val;
+}
+function setHTML(id, val) {
+  const el = document.getElementById(id);
+  if (el) el.innerHTML = val;
+}
+function setCheck(id, isReady, isPassed, limitText) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  if (!isReady) { el.textContent = '—'; el.className = 'detail-check'; return; }
+  el.className = 'detail-check ' + (isPassed ? 'check-pass' : 'check-fail');
+  el.textContent = (isPassed ? '✓ ' : '✗ ') + limitText;
+}
+
+// Hook into all input events
+document.addEventListener('DOMContentLoaded', () => {
+  const allInputs = document.querySelectorAll('.calc-input');
+  allInputs.forEach(inp => inp.addEventListener('input', () => {
+    setTimeout(refreshDisplayLayer, 10);
+  }));
+
+  const tailSel = document.getElementById('select-tail');
+  if (tailSel) tailSel.addEventListener('change', () => {
+    setTimeout(refreshDisplayLayer, 50);
+  });
+});
+
+// Also run whenever script.js finishes a calculation
+const _origRun = window.runCalculations;
+if (typeof _origRun === 'function') {
+  window.runCalculations = function() {
+    _origRun();
+    refreshDisplayLayer();
+  };
+}
+
+// ── Hamburger nav ──────────────────────────────────────────────
+const navToggle = document.getElementById('navToggle');
+const navLinks  = document.getElementById('navLinks');
+if (navToggle && navLinks) {
+  navToggle.addEventListener('click', () => {
+    const isOpen = navLinks.classList.toggle('open');
+    navToggle.classList.toggle('open', isOpen);
+    navToggle.setAttribute('aria-expanded', isOpen);
+  });
+  navLinks.querySelectorAll('a').forEach(a => {
+    a.addEventListener('click', () => {
+      navLinks.classList.remove('open');
+      navToggle.classList.remove('open');
+      navToggle.setAttribute('aria-expanded', 'false');
+    });
+  });
+  document.addEventListener('click', e => {
+    if (!navToggle.contains(e.target) && !navLinks.contains(e.target)) {
+      navLinks.classList.remove('open');
+      navToggle.classList.remove('open');
+      navToggle.setAttribute('aria-expanded', 'false');
+    }
+  });
+}
+
+// ── Online/Offline badge ───────────────────────────────────────
+const onlineBadge = document.getElementById('badge-online');
+function updateOnlineBadge() {
+  if (!onlineBadge) return;
+  if (navigator.onLine) {
+    onlineBadge.textContent = '● Online';
+    onlineBadge.className = 'badge badge-green';
+  } else {
+    onlineBadge.textContent = '◌ Offline — Tarmac Mode';
+    onlineBadge.className = 'badge badge-amber';
+  }
+}
+window.addEventListener('online',  updateOnlineBadge);
+window.addEventListener('offline', updateOnlineBadge);
+updateOnlineBadge();
+
+// ── PWA Install Prompt ─────────────────────────────────────────
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  const bar = document.getElementById('pwa-install-bar');
+  if (bar) bar.style.display = 'flex';
+});
+const pwaBtn = document.getElementById('pwa-install-btn');
+if (pwaBtn) {
+  pwaBtn.addEventListener('click', async () => {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    trackEvent('pwa_install_' + outcome);
+    deferredPrompt = null;
+    const bar = document.getElementById('pwa-install-bar');
+    if (bar) bar.style.display = 'none';
+  });
+}
+window.addEventListener('appinstalled', () => {
+  trackEvent('pwa_installed');
+  const bar = document.getElementById('pwa-install-bar');
+  if (bar) bar.style.display = 'none';
+});
+</script>
+</body>
+</html>
