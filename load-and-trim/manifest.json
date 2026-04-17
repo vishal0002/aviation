@@ -1,0 +1,47 @@
+{
+  "name": "FTO - Load & Trim",
+  "short_name": "Load & Trim",
+  "description": "Offline-capable Load and Trim sheet calculator for Aviation FTO Cessna 172 fleet.",
+  "start_url": "/load-and-trim/",
+  "scope": "/load-and-trim/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#080c14",
+  "theme_color": "#00d4ff",
+  "lang": "en",
+  "categories": ["utilities", "productivity"],
+  "icons": [
+    {
+      "src": "/favicon.png",
+      "sizes": "32x32",
+      "type": "image/png"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Open Load & Trim",
+      "short_name": "Trim Sheet",
+      "description": "Open the W&B calculator",
+      "url": "/load-and-trim/",
+      "icons": [{ "src": "/favicon.png", "sizes": "32x32" }]
+    }
+  ]
+}
