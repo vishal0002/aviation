@@ -45,7 +45,7 @@ self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
 
   // API calls: network-first, fall back to nothing (handled in app)
-  if (url.pathname.startsWith('/api/')) {
+  if (url.hostname.includes('workers.dev')) {
     event.respondWith(fetch(event.request));
     return;
   }
