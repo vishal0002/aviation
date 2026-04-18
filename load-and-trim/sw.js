@@ -7,8 +7,10 @@ const ASSETS_TO_CACHE = [
   '/load-and-trim/script.js',
   '/load-and-trim/style.css',
   '/load-and-trim/manifest.json',
+  '/icon-192.png',        
+  '/icon-512.png',       
+  '/favicon.png'          
   // Google Fonts are handled separately (network-first)
-];
 
 // ── Install: cache all static assets ──────────────────────────
 self.addEventListener('install', (event) => {
