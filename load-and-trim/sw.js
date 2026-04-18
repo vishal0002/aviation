@@ -11,7 +11,7 @@ const ASSETS_TO_CACHE = [
   '/icon-512.png',       
   '/favicon.png'          
   // Google Fonts are handled separately (network-first)
-
+];
 // ── Install: cache all static assets ──────────────────────────
 self.addEventListener('install', (event) => {
   console.log('[SW] Installing Aviation cache…');
