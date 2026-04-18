@@ -91,10 +91,19 @@ function runCalculations() {
     let isCGSafe = (finalCG >= limits.cg_forward && finalCG <= limits.cg_aft);
     let isSafeToFly = isWeightSafe && isBaggageSafe && isCGSafe;
 
-    // 6. Output to DOM
+    // 6. Output Final Numbers to DOM
     document.getElementById('out-tow').innerText = takeoffWeight.toFixed(2);
     document.getElementById('out-cg').innerText = finalCG.toFixed(2);
     document.getElementById('out-status').innerText = isSafeToFly ? "WITHIN LIMITS ✅" : "NO GO ❌";
+
+    // 7. NEW: Output Live Moments to the Table!
+    // (Ensure these IDs match your index.html exactly)
+    document.getElementById('val-fuel-wt').innerText = fuelWeight.toFixed(2); // Show fuel in kg
+    document.getElementById('val-fuel-mom').innerText = calculateMoment(fuelWeight, stations.usable_fuel_arm).toFixed(2);
+    document.getElementById('val-pilot-mom').innerText = calculateMoment(pilotWeight, stations.pilot_copilot_arm).toFixed(2);
+    document.getElementById('val-pax-mom').innerText = calculateMoment(rearPaxWeight, stations.rear_pax_arm).toFixed(2);
+    document.getElementById('val-bag1-mom').innerText = calculateMoment(baggage1Weight, stations.baggage_1_arm).toFixed(2);
+    document.getElementById('val-bag2-mom').innerText = calculateMoment(baggage2Weight, stations.baggage_2_arm).toFixed(2);
 }
 
 // --- DOM BINDINGS ---
@@ -114,10 +123,30 @@ function populateTailDropdown() {
         currentAircraft = fleetDatabase.fleet.find(a => a.tail_number === tail);
         if (currentAircraft) {
             currentModelSpecs = fleetDatabase.aircraft_models[currentAircraft.model];
-            // Apply UI defaults
+            
+            // --- NEW: UPDATE THE UI INFO CHIPS ON SELECTION ---
+            document.getElementById('chip-model').innerText = currentAircraft.model;
+            document.getElementById('chip-bew').innerText = currentAircraft.bew_kg;
+            document.getElementById('chip-mtow').innerText = currentAircraft.mtow_kg;
+            document.getElementById('chip-cg').innerText = `${currentModelSpecs.limits.cg_forward} - ${currentModelSpecs.limits.cg_aft}`;
+
+            // --- NEW: UPDATE THE STATIC TABLE ROWS ON SELECTION ---
+            document.getElementById('val-bew-wt').innerText = currentAircraft.bew_kg;
+            document.getElementById('val-bew-arm').innerText = currentAircraft.bew_arm;
+            document.getElementById('val-bew-mom').innerText = calculateMoment(currentAircraft.bew_kg, currentAircraft.bew_arm).toFixed(2);
+            
+            document.getElementById('val-fuel-arm').innerText = currentModelSpecs.stations.usable_fuel_arm;
+            document.getElementById('val-pilot-arm').innerText = currentModelSpecs.stations.pilot_copilot_arm;
+            document.getElementById('val-pax-arm').innerText = currentModelSpecs.stations.rear_pax_arm;
+            document.getElementById('val-bag1-arm').innerText = currentModelSpecs.stations.baggage_1_arm;
+            document.getElementById('val-bag2-arm').innerText = currentModelSpecs.stations.baggage_2_arm;
+
+            // Apply UI defaults from database
             document.getElementById('in-rear-pax').value = fleetDatabase.ui_defaults.rear_pax_kg;
             document.getElementById('in-bag1').value = fleetDatabase.ui_defaults.baggage_1_kg;
             document.getElementById('in-bag2').value = fleetDatabase.ui_defaults.baggage_2_kg;
+            
+            // Run math instantly
             runCalculations();
         }
     });
