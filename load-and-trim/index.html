@@ -330,108 +330,48 @@
 <script src="script.js"></script>
 
 <script>
-// ── Display Enhancement Layer ──────────────────────────────────
-// Augments the DOM with moment/weight display values using
-// the globals exposed by script.js (currentAircraft, currentModelSpecs)
+// ── Universal Display Enhancement Layer ──────────────────────────────────
+// This connects the dynamic math engine to your beautiful CSS cards
+function refreshDisplayLayer(takeoffWeight, finalCG, totalBaggage) {
+  if (!currentAircraft) return;
 
-function refreshDisplayLayer() {
-  // 1. Removed "window." from the check
-  if (typeof currentAircraft === 'undefined' || !currentAircraft || !currentModelSpecs) return;
+  const ac = currentAircraft;
+  const lim = ac.limits;
 
-  // 2. Removed "window." from the assignments
-  const ac  = currentAircraft;
-  const sp  = currentModelSpecs;
-  
-  const st  = sp.stations;
-  const lim = sp.limits;
-  const con = sp.constants;
-
-  // Input values
-  const fuelL  = parseFloat(document.getElementById('in-fuel').value)    || 0;
-  const pilot  = parseFloat(document.getElementById('in-pilot').value)   || 0;
-  const pax    = parseFloat(document.getElementById('in-rear-pax').value)|| 0;
-  const bag1   = parseFloat(document.getElementById('in-bag1').value)    || 0;
-  const bag2   = parseFloat(document.getElementById('in-bag2').value)    || 0;
-
-  const fuelKg = fuelL * con.avgas_sg;
-  const bewMom = ac.bew_kg * ac.bew_arm;
-
-  // --- Row 1: BEW ---
-  setText('disp-bew-wt',     ac.bew_kg.toFixed(2));
-  setText('disp-bew-arm',    ac.bew_arm.toFixed(2));
-  setText('disp-bew-moment', bewMom.toFixed(0));
-
-  // --- Row 2: Fuel ---
-  setText('disp-fuel-arm',    st.usable_fuel_arm.toFixed(2));
-  setText('disp-fuel-kg',     fuelKg.toFixed(1) + ' kg');
-  setText('disp-fuel-moment', fuelL > 0 ? (fuelKg * st.usable_fuel_arm).toFixed(0) : '—');
-
-  // --- Row 3: Pilot ---
-  setText('disp-pilot-arm',    st.pilot_copilot_arm.toFixed(2));
-  setText('disp-pilot-moment', pilot > 0 ? (pilot * st.pilot_copilot_arm).toFixed(0) : '—');
-
-  // --- Row 4: Rear Pax ---
-  setText('disp-pax-arm',    st.rear_pax_arm.toFixed(2));
-  setText('disp-pax-moment', pax > 0 ? (pax * st.rear_pax_arm).toFixed(0) : '—');
-
-  // --- Row 5: Bag 1 ---
-  setText('disp-bag1-arm',    st.baggage_1_arm.toFixed(2));
-  setText('disp-bag1-moment', bag1 > 0 ? (bag1 * st.baggage_1_arm).toFixed(0) : '—');
-
-  // --- Row 6: Bag 2 ---
-  setText('disp-bag2-arm',    st.baggage_2_arm.toFixed(2));
-  setText('disp-bag2-moment', bag2 > 0 ? (bag2 * st.baggage_2_arm).toFixed(0) : '—');
-
-  // --- Row 7: Ramp Weight ---
-  const totalMom = bewMom
-    + (fuelKg * st.usable_fuel_arm)
-    + (pilot  * st.pilot_copilot_arm)
-    + (pax    * st.rear_pax_arm)
-    + (bag1   * st.baggage_1_arm)
-    + (bag2   * st.baggage_2_arm);
-  const rampWt = ac.bew_kg + pilot + pax + bag1 + bag2 + fuelKg;
-  setText('disp-ramp-wt',     rampWt.toFixed(2));
-  setText('disp-ramp-moment', totalMom.toFixed(0));
-
-  // --- Row 8: Taxi ---
-  const taxiWt  = con.taxi_fuel_kg;
-  const taxiArm = con.taxi_fuel_arm;
-  setText('disp-taxi-wt',     taxiWt.toFixed(2));
-  setText('disp-taxi-arm',    taxiArm.toFixed(2));
-  setText('disp-taxi-moment', (taxiWt * taxiArm).toFixed(0));
-
-  // --- Aircraft Info Strip ---
-  setHTML('info-model',    `<span class="chip-label">Model</span><span class="chip-val">${ac.model}</span>`);
-  setHTML('info-bew',      `<span class="chip-label">BEW</span><span class="chip-val">${ac.bew_kg} kg</span>`);
-  setHTML('info-mtow',     `<span class="chip-label">MTOW</span><span class="chip-val">${ac.mtow_kg} kg</span>`);
+  // 1. Aircraft Info Strip
+  setHTML('info-model',    `<span class="chip-label">Model</span><span class="chip-val">${ac.type}</span>`);
+  setHTML('info-bew',      `<span class="chip-label">BEW</span><span class="chip-val">${ac.bew_kg.toFixed(2)} kg</span>`);
+  setHTML('info-mtow',     `<span class="chip-label">MTOW</span><span class="chip-val">${lim.mtow_kg.toFixed(2)} kg</span>`);
   setHTML('info-cg-range', `<span class="chip-label">C.G.</span><span class="chip-val">${lim.cg_forward}–${lim.cg_aft} in</span>`);
 
-  // --- Max Baggage ---
-  setText('disp-max-bag', lim.max_baggage_kg + ' kg');
+  // 2. Detail Cards
+  setText('detail-tow', takeoffWeight.toFixed(2));
+  setText('detail-cg',  finalCG.toFixed(2));
+  setText('detail-bag', totalBaggage.toFixed(1));
 
-  // --- Detail Cards & Status ---
-  const towEl = document.getElementById('out-tow');
-  const cgEl  = document.getElementById('out-cg');
-  if (!towEl || !cgEl) return;
+  const isWeightSafe  = takeoffWeight > 0 && takeoffWeight <= lim.mtow_kg;
+  const isCGSafe      = finalCG >= lim.cg_forward && finalCG <= lim.cg_aft;
 
-  const tow = parseFloat(towEl.innerText) || 0;
-  const cg  = parseFloat(cgEl.innerText)  || 0;
+  // Dynamically calculate max baggage based on the active aircraft
+  let maxBag = 9999;
+  let bagText = "N/A";
+  if (ac.stations.some(s => s.id.includes('bag'))) {
+     maxBag = ac.stations.filter(s => s.id.includes('bag')).reduce((sum, s) => sum + (s.max_kg || 0), 0);
+     bagText = `≤ ${maxBag.toFixed(2)} kg`;
+     setText('disp-max-bag', `${maxBag.toFixed(2)} kg`);
+  } else {
+     setText('disp-max-bag', 'Check POH');
+  }
 
-  setText('detail-tow', tow.toFixed(2));
-  setText('detail-cg',  cg.toFixed(2));
-  setText('detail-bag', (bag1 + bag2).toFixed(1));
+  const isBaggageSafe = totalBaggage <= maxBag;
+  const isReady       = takeoffWeight > 0;
 
-  const isWeightSafe  = tow > 0 && tow <= ac.mtow_kg;
-  const isBaggageSafe = (bag1 + bag2) <= lim.max_baggage_kg;
-  const isCGSafe      = cg >= lim.cg_forward && cg <= lim.cg_aft;
-  const isReady       = tow > 0;
-
-  // Check badges
-  setCheck('check-weight', isReady, isWeightSafe, `≤ ${ac.mtow_kg} kg MTOW`);
+  // 3. Status Badges
+  setCheck('check-weight', isReady, isWeightSafe, `≤ ${lim.mtow_kg} kg MTOW`);
   setCheck('check-cg',     isReady, isCGSafe,     `${lim.cg_forward}–${lim.cg_aft} in`);
-  setCheck('check-bag',    isReady, isBaggageSafe, `≤ ${lim.max_baggage_kg} kg`);
+  setCheck('check-bag',    isReady, isBaggageSafe, bagText);
 
-  // Status card
+  // 4. Main Go/No-Go Card
   const card = document.getElementById('status-card');
   const statusEl = document.getElementById('out-status');
   const subEl    = document.getElementById('status-sub');
@@ -446,54 +386,27 @@ function refreshDisplayLayer() {
   if (isSafe) {
     card.className = 'status-card status-go';
     if (statusEl) statusEl.textContent = 'WITHIN LIMITS ✅';
-    if (subEl) subEl.textContent = `TOW: ${tow.toFixed(1)} kg  ·  C.G.: ${cg.toFixed(2)} in  ·  All checks passed`;
+    if (subEl) subEl.textContent = `TOW: ${takeoffWeight.toFixed(1)} kg  ·  C.G.: ${finalCG.toFixed(2)} in  ·  All checks passed`;
   } else {
     card.className = 'status-card status-nogo';
     if (statusEl) statusEl.textContent = 'NO GO ❌';
     let reasons = [];
-    if (!isWeightSafe)  reasons.push(`Weight ${tow.toFixed(1)} kg exceeds MTOW ${ac.mtow_kg} kg`);
-    if (!isCGSafe)      reasons.push(`C.G. ${cg.toFixed(2)} in out of range ${lim.cg_forward}–${lim.cg_aft}`);
-    if (!isBaggageSafe) reasons.push(`Baggage ${(bag1+bag2).toFixed(1)} kg exceeds ${lim.max_baggage_kg} kg limit`);
+    if (!isWeightSafe)  reasons.push(`Weight exceeds MTOW`);
+    if (!isCGSafe)      reasons.push(`C.G. out of range`);
+    if (!isBaggageSafe) reasons.push(`Baggage exceeds limit`);
     if (subEl) subEl.textContent = reasons.join(' · ');
   }
 }
 
-function setText(id, val) {
-  const el = document.getElementById(id);
-  if (el) el.textContent = val;
-}
-function setHTML(id, val) {
-  const el = document.getElementById(id);
-  if (el) el.innerHTML = val;
-}
+// Helper functions
+function setText(id, val) { const el = document.getElementById(id); if (el) el.textContent = val; }
+function setHTML(id, val) { const el = document.getElementById(id); if (el) el.innerHTML = val; }
 function setCheck(id, isReady, isPassed, limitText) {
   const el = document.getElementById(id);
   if (!el) return;
   if (!isReady) { el.textContent = '—'; el.className = 'detail-check'; return; }
   el.className = 'detail-check ' + (isPassed ? 'check-pass' : 'check-fail');
   el.textContent = (isPassed ? '✓ ' : '✗ ') + limitText;
-}
-
-// Hook into all input events
-document.addEventListener('DOMContentLoaded', () => {
-  const allInputs = document.querySelectorAll('.calc-input');
-  allInputs.forEach(inp => inp.addEventListener('input', () => {
-    setTimeout(refreshDisplayLayer, 10);
-  }));
-
-  const tailSel = document.getElementById('select-tail');
-  if (tailSel) tailSel.addEventListener('change', () => {
-    setTimeout(refreshDisplayLayer, 50);
-  });
-});
-
-// Also run whenever script.js finishes a calculation
-const _origRun = window.runCalculations;
-if (typeof _origRun === 'function') {
-  window.runCalculations = function() {
-    _origRun();
-    refreshDisplayLayer();
-  };
 }
 
 // ── Hamburger nav ──────────────────────────────────────────────
