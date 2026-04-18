@@ -1,1 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>About | FTO Load &amp; Trim</title>
 
+  <meta name="author" content="Vishal Bagade">
+  <meta name="description" content="System architecture, database blueprint, and philosophy behind the universal FTO Load & Trim calculation engine.">
+  <meta name="robots" content="index, follow">
+  <meta name="theme-color" content="#00d4ff">
+
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-EVS54RD7KM"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-EVS54RD7KM');
+  </script>
+  <script>
+    function trackEvent(name, params = {}) { gtag('event', name, params); }
+  </script>
+
+  <script data-goatcounter="https://evo-vhil.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+
+  <link rel="manifest" href="manifest.json">
+
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=IBM+Plex+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+
+  <link rel="preload" href="style.css" as="style">
+  <link rel="stylesheet" href="style.css">
+
+  <style>
+    /* Specific typography tweaks for the About page readability */
+    .about-content h3 {
+      font-family: var(--head);
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: var(--text-hi);
+      margin: 2rem 0 1rem;
+      letter-spacing: 0.03em;
+    }
+    .about-content p, .about-content ul {
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      color: var(--text-dim);
+      line-height: 1.8;
+      margin-bottom: 1rem;
+    }
+    .about-content ul {
+      padding-left: 1.5rem;
+    }
+    .about-content li {
+      margin-bottom: 0.5rem;
+    }
+    .about-content strong {
+      color: var(--cyan);
+      font-weight: 500;
+    }
+    .code-block {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.25rem;
+      overflow-x: auto;
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      color: #8892b0;
+      line-height: 1.5;
+      margin: 1rem 0 1.5rem;
+    }
+    .code-block .str { color: #22c55e; }
+    .code-block .num { color: #f59e0b; }
+    .code-block .key { color: var(--cyan); }
+    
+    .creator-card {
+      background: rgba(0, 212, 255, 0.03);
+      border: 1px solid var(--border-hi);
+      border-radius: var(--radius);
+      padding: 2rem;
+      margin-top: 3rem;
+      text-align: center;
+    }
+    .creator-btn {
+      display: inline-block;
+      margin-top: 1.25rem;
+      font-family: var(--head);
+      font-size: 0.9rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--bg);
+      background: var(--cyan);
+      padding: 0.6rem 1.5rem;
+      border-radius: 4px;
+      text-decoration: none;
+      transition: all 0.2s;
+      box-shadow: var(--glow);
+    }
+    .creator-btn:hover {
+      background: #eef4fb;
+      box-shadow: 0 0 25px rgba(0, 212, 255, 0.5);
+    }
+  </style>
+</head>
+
+<body>
+<div class="scanline"></div>
+
+<nav>
+  <div class="nav-inner">
+    <a href="/load-and-trim/" class="nav-logo">
+      <span class="dot"></span>Aviation
+    </a>
+    <button class="nav-hamburger" id="navToggle" aria-label="Toggle navigation" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+    <div class="nav-links" id="navLinks">
+      <a href="/">Home</a>
+      <a href="/load-and-trim/">Load &amp; Trim</a>
+      <a href="/about.html" class="active">About</a>
+    </div>
+  </div>
+</nav>
+
+<section class="page-hero">
+  <div class="container">
+    <div class="page-tag">Behind the Code</div>
+    <h1>System Architecture <span class="text-cyan">&amp; Philosophy</span></h1>
+    <div class="hero-subtitle">Universal Load &amp; Trim Calculation Engine</div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container about-content">
+    
+    <h3>🛡️ Ironclad Privacy &amp; The Tarmac Vault</h3>
+    <p>Flight Training Organizations (FTOs) require strict data sovereignty. This tool operates on a <strong>Zero-Trust, Local-First Architecture</strong>.</p>
+    <ul>
+      <li><strong>No Accounts, No Logins:</strong> You will never be asked to create an account to run a calculation.</li>
+      <li><strong>100% Offline Capability:</strong> Using modern Service Worker caching, the entire calculation engine and FTO database are not vaulted.</li>
+      <li><strong>Absolute Privacy:</strong> Your calculations and fleet data remain entirely on your device. We do not store, process, or transmit your load sheets to any external servers.</li>
+    </ul>
+
+    <h3>🏗️ Data-Driven Scalability</h3>
+    <p>This app is not a hardcoded calculator; it is a universal math engine. By decoupling the UI from the data, it instantly adapts to any aircraft configuration—from a 4-seat Cessna 172 to a 7-seat Partenavia P68C—simply by reading a flattened JSON array.</p>
+    <p><strong>Want your FTO's fleet added?</strong> If you want your specific fleet added to the database, format your data using the JSON schema below and email it to <strong>feedback@evovhil.com</strong>.</p>
+    <p><strong>🔒 Authenticity Check:</strong> To ensure strict data integrity, you <strong>must attach a recent photo or scan of your FTO's official Load &amp; Trim sheet</strong> to your email. We will use this to verify the specific arms, limits, and stations before approving the pull request to the live database.</p>
+    
+    <div class="code-block">
+<span class="key">"your_fto_id"</span>: {
+  <span class="key">"fto_name"</span>: <span class="str">"Your Aviation Academy Name"</span>,
+  <span class="key">"ui_defaults"</span>: { <span class="key">"fuel_l"</span>: <span class="num">0</span> },
+  <span class="key">"fleet"</span>: [
+    {
+      <span class="key">"tail_number"</span>: <span class="str">"VT-XYZ"</span>,
+      <span class="key">"type"</span>: <span class="str">"Aircraft Model"</span>,
+      <span class="key">"bew_kg"</span>: <span class="num">0.0</span>,
+      <span class="key">"bew_arm"</span>: <span class="num">0.0</span>,
+      <span class="key">"limits"</span>: { <span class="key">"mtow_kg"</span>: <span class="num">0.0</span>, <span class="key">"cg_forward"</span>: <span class="num">0.0</span>, <span class="key">"cg_aft"</span>: <span class="num">0.0</span> },
+      <span class="key">"constants"</span>: { <span class="key">"taxi_fuel_kg"</span>: <span class="num">0.0</span>, <span class="key">"taxi_fuel_arm"</span>: <span class="num">0.0</span>, <span class="key">"avgas_sg"</span>: <span class="num">0.72</span> },
+      <span class="key">"stations"</span>: [
+        { <span class="key">"id"</span>: <span class="str">"fuel"</span>, <span class="key">"name"</span>: <span class="str">"Usable Fuel"</span>, <span class="key">"arm"</span>: <span class="num">48.0</span>, <span class="key">"is_fuel"</span>: <span class="key">true</span> },
+        { <span class="key">"id"</span>: <span class="str">"pilot"</span>, <span class="key">"name"</span>: <span class="str">"Pilot (PIC)"</span>, <span class="key">"arm"</span>: <span class="num">37.0</span> }
+        <span class="num">// Add infinite custom payload stations here...</span>
+      ]
+    }
+  ]
+}
+    </div>
+
+    <div class="disclaimer-strip" style="margin: 2.5rem 0;">
+      <span class="note-icon" style="font-size: 1rem; vertical-align: middle;">⚠️</span> 
+      <strong style="color: var(--amber);">WARNING — FOR EDUCATIONAL &amp; TRAINING PURPOSES ONLY:</strong> While this calculation engine is built for high precision, it does not replace official documentation. The specific <strong>Pilot's Operating Handbook (POH)</strong> and the Pilot-In-Command (PIC) remain the absolute and final authority for all flight planning, weight limits, and center of gravity verification. 
+    </div>
+
+    <h3>🚀 The Horizon</h3>
+    <p>This <code>v2.0</code> release stands as the definitive, offline-first calculation engine. However, the architecture is designed to scale. With enough user adoption and community support, the roadmap for this platform includes evolving into a full-fledged aviation learning ecosystem—complete with an AI-powered engine to dynamically generate sample exam papers for DGCA preparation.</p>
+
+    <div class="creator-card">
+      <h3 style="margin-top: 0;">👨‍💻 Built By Vishal Bagade</h3>
+      <a href="https://vishal.evovhil.com" class="creator-btn" target="_blank" rel="noopener">Explore Other Projects &rarr;</a>
+    </div>
+
+  </div>
+</section>
+
+<footer>
+  <div class="footer-inner">
+    <div>
+      <div class="footer-brand">✈ Aviation · Load &amp; Trim</div>
+      <div class="footer-meta">aviation.evovhil.com · Offline PWA · Built by Vishal Bagade</div>
+    </div>
+    <nav class="footer-nav">
+      <a href="/">Home</a>
+      <a href="/load-and-trim/">Load &amp; Trim</a>
+      <a href="/about.html">About</a>
+      <a href="https://evovhil.com/">EVO vHIL</a>
+    </nav>
+  </div>
+</footer>
+
+<script>
+// ── Hamburger nav ──────────────────────────────────────────────
+const navToggle = document.getElementById('navToggle');
+const navLinks  = document.getElementById('navLinks');
+if (navToggle && navLinks) {
+  navToggle.addEventListener('click', () => {
+    const isOpen = navLinks.classList.toggle('open');
+    navToggle.classList.toggle('open', isOpen);
+    navToggle.setAttribute('aria-expanded', isOpen);
+  });
+  navLinks.querySelectorAll('a').forEach(a => {
+    a.addEventListener('click', () => {
+      navLinks.classList.remove('open');
+      navToggle.classList.remove('open');
+      navToggle.setAttribute('aria-expanded', 'false');
+    });
+  });
+  document.addEventListener('click', e => {
+    if (!navToggle.contains(e.target) && !navLinks.contains(e.target)) {
+      navLinks.classList.remove('open');
+      navToggle.classList.remove('open');
+      navToggle.setAttribute('aria-expanded', 'false');
+    }
+  });
+}
+</script>
+</body>
+</html>
