@@ -150,8 +150,8 @@
             <th class="col-moment">Moment<br><small>kg·in</small></th>
           </tr>
         </thead>
+        
         <tbody>
-          <!-- Row 1: Basic Empty Weight -->
           <tr class="row-fixed">
             <td class="col-sr">1</td>
             <td class="col-item">
@@ -162,108 +162,25 @@
             <td class="col-arm"><span id="disp-bew-arm" class="fixed-val">—</span></td>
             <td class="col-moment"><span id="disp-bew-moment" class="fixed-val">—</span></td>
           </tr>
+        </tbody>
 
-          <!-- Row 2: Usable Fuel -->
-          <tr class="row-input">
-            <td class="col-sr">2</td>
-            <td class="col-item">
-              <span class="item-name">Usable Fuel</span>
-              <span class="item-sub">Enter litres → auto kg @0.72 SG</span>
-            </td>
-            <td class="col-wt">
-              <div class="input-cell">
-                <input type="number" id="in-fuel" class="calc-input" placeholder="eg. 144" min="0" inputmode="decimal" aria-label="Fuel in litres">
-                <span class="input-unit">L</span>
-              </div>
-              <span id="disp-fuel-kg" class="computed-sub">— kg</span>
-            </td>
-            <td class="col-arm"><span id="disp-fuel-arm" class="fixed-val">—</span></td>
-            <td class="col-moment"><span id="disp-fuel-moment" class="computed-val">—</span></td>
-          </tr>
+        <tbody id="dynamic-payload-container">
+          </tbody>
 
-          <!-- Row 3: Pilot + Co-Pilot -->
-          <tr class="row-input">
-            <td class="col-sr">3</td>
-            <td class="col-item">
-              <span class="item-name">Pilot &amp; Co-Pilot</span>
-              <span class="item-sub">Front seat combined</span>
-            </td>
-            <td class="col-wt">
-              <div class="input-cell">
-                <input type="number" id="in-pilot" class="calc-input" placeholder="eg. 150" min="0" inputmode="decimal" aria-label="Pilot and co-pilot weight in kg">
-                <span class="input-unit">kg</span>
-              </div>
-            </td>
-            <td class="col-arm"><span id="disp-pilot-arm" class="fixed-val">—</span></td>
-            <td class="col-moment"><span id="disp-pilot-moment" class="computed-val">—</span></td>
-          </tr>
-
-          <!-- Row 4: Rear Passengers -->
-          <tr class="row-input">
-            <td class="col-sr">4</td>
-            <td class="col-item">
-              <span class="item-name">Rear Passengers</span>
-              <span class="item-sub">Rear seat combined</span>
-            </td>
-            <td class="col-wt">
-              <div class="input-cell">
-                <input type="number" id="in-rear-pax" class="calc-input" placeholder="0" min="0" inputmode="decimal" aria-label="Rear passenger weight in kg">
-                <span class="input-unit">kg</span>
-              </div>
-            </td>
-            <td class="col-arm"><span id="disp-pax-arm" class="fixed-val">—</span></td>
-            <td class="col-moment"><span id="disp-pax-moment" class="computed-val">—</span></td>
-          </tr>
-
-          <!-- Row 5: Baggage Area 1 -->
-          <tr class="row-input">
-            <td class="col-sr">5</td>
-            <td class="col-item">
-              <span class="item-name">Baggage Area 1</span>
-              <span class="item-sub">Aft of rear seat</span>
-            </td>
-            <td class="col-wt">
-              <div class="input-cell">
-                <input type="number" id="in-bag1" class="calc-input" placeholder="0" min="0" inputmode="decimal" aria-label="Baggage area 1 weight in kg">
-                <span class="input-unit">kg</span>
-              </div>
-            </td>
-            <td class="col-arm"><span id="disp-bag1-arm" class="fixed-val">—</span></td>
-            <td class="col-moment"><span id="disp-bag1-moment" class="computed-val">—</span></td>
-          </tr>
-
-          <!-- Row 6: Baggage Area 2 -->
-          <tr class="row-input">
-            <td class="col-sr">6</td>
-            <td class="col-item">
-              <span class="item-name">Baggage Area 2</span>
-              <span class="item-sub">Tailcone / extended baggage</span>
-            </td>
-            <td class="col-wt">
-              <div class="input-cell">
-                <input type="number" id="in-bag2" class="calc-input" placeholder="0" min="0" inputmode="decimal" aria-label="Baggage area 2 weight in kg">
-                <span class="input-unit">kg</span>
-              </div>
-            </td>
-            <td class="col-arm"><span id="disp-bag2-arm" class="fixed-val">—</span></td>
-            <td class="col-moment"><span id="disp-bag2-moment" class="computed-val">—</span></td>
-          </tr>
-
-          <!-- Row 7: Ramp Weight (computed) -->
+        <tbody>
           <tr class="row-subtotal">
-            <td class="col-sr">7</td>
+            <td class="col-sr" id="sr-ramp">—</td>
             <td class="col-item">
               <span class="item-name">Ramp Weight</span>
-              <span class="item-sub">Rows 1–6 sum</span>
+              <span class="item-sub">Total before engine start</span>
             </td>
             <td class="col-wt"><span id="disp-ramp-wt" class="subtotal-val">—</span></td>
             <td class="col-arm">—</td>
             <td class="col-moment"><span id="disp-ramp-moment" class="subtotal-val">—</span></td>
           </tr>
 
-          <!-- Row 8: Taxi Fuel -->
           <tr class="row-fixed row-deduct">
-            <td class="col-sr">8</td>
+            <td class="col-sr" id="sr-taxi">—</td>
             <td class="col-item">
               <span class="item-name">Engine Start &amp; Taxi Fuel</span>
               <span class="item-sub">Deducted from ramp weight</span>
@@ -273,12 +190,11 @@
             <td class="col-moment"><span id="disp-taxi-moment" class="fixed-val">—</span></td>
           </tr>
 
-          <!-- Row 9: Total Takeoff -->
           <tr class="row-result">
-            <td class="col-sr">9</td>
+            <td class="col-sr" id="sr-tow">—</td>
             <td class="col-item">
               <span class="item-name">Total Take Off Weight</span>
-              <span class="item-sub">(Row 7 − Row 8)</span>
+              <span class="item-sub">(Ramp − Taxi)</span>
             </td>
             <td class="col-wt">
               <span id="out-tow" class="result-val">0.00</span>
